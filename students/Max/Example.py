@@ -58,6 +58,16 @@ model = Sequential([Flatten(input_shape=(NDIM, 1)),
                     Dense(NDIM, activation='sigmoid'),
                     Dense(1,kernel_initializer='normal', activation='sigmoid')])
 
+# or: 
+
+model = Sequential([Flatten(input_shape=(NDIM, 1)),
+                    Dense(NDIM*2, activation='sigmoid'),
+                    Dense(NDIM*2, activation='sigmoid'),
+                    Dense(NDIM*2, activation='sigmoid'),
+                    Dense(1,kernel_initializer='normal', activation='sigmoid')])
+
+
+
 # compile the model
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 # print the model summary
@@ -81,21 +91,23 @@ X_test = scaler.transform(X_test)
 
 
 
+import tensorflow as tf
+
+callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=1)
+
 history = model.fit(X_train_val, 
                     Y_train_val, 
-                    epochs=5, 
+                    epochs=100, 
                     batch_size=1024, 
                     #verbose=0, # switch to 1 for more verbosity 
-                    #callbacks=my_callbacks,
+                    callbacks=[callback]
                     #validation_split=0.25
                    )
 
 
 
-
-# I didn't get an output, so untested
 import matplotlib.pyplot as plt
-%matplotlib inline
+#%matplotlib inline
 # plot loss vs epoch
 plt.figure(figsize=(15,10))
 ax = plt.subplot(2, 2, 1)
