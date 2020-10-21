@@ -98,7 +98,9 @@ for i, j in enumerate(VARS):
     plt.close()
 
 
-# bis hier 16.10.
+#######################################################################################
+# sklearn Teil
+#######################################################################################
 
 
 NDIM = len(VARS)
@@ -156,18 +158,6 @@ print(clf.predict(X_test))
 #######################################################################################
 
 # TTZ + TWZ:
-'''
-arr1 = np.zeros((len(df['TTZ']), 3))
-arr1[:,0] = np.ones((len(df['TTZ'])))
-df['TTZ']['isSignal'] = arr1
-
-arr2 = np.zeros((len(df['TTZ']), 3))
-arr2[:,1] = np.ones((len(df['TTZ'])))
-df['TWZ']['isSignal'] = arr2
-
-arr3 = np.zeros((len(df['TTZ']), 3))
-arr3[:,0] = np.ones((len(df['TTZ'])))
-df['WZ']['isSignal'] = arr3'''
 
 df['TWZ']['isSignal'] = np.ones(len(df['TWZ'])) * 0
 df['TTZ']['isSignal'] = np.ones(len(df['TTZ'])) * 1
