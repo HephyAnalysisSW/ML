@@ -154,10 +154,22 @@ print(clf.predict(X_test))
 
 
 #######################################################################################
+# Save trained Model:
+
+import pickle
+pickle.dump(clf, open("TTZ_TWZ_WZ_sklearn_Model.sav", 'wb'))
+
+
+#load
+sklearn_model_loaded = pickle.load(open("TTZ_TWZ_WZ_sklearn_Model.sav", 'rb'))
+#result = sklearn_model_loaded.score(X_test, Y_test)
+#print(result)
+pred = sklearn_model_loaded.predict(X_test[:3])
+print(pred)
+
+#######################################################################################
 # Compare with Keras One versus All:
 #######################################################################################
-
-# TTZ + TWZ:
 
 df['TWZ']['isSignal'] = np.ones(len(df['TWZ'])) * 0
 df['TTZ']['isSignal'] = np.ones(len(df['TTZ'])) * 1
@@ -222,6 +234,25 @@ test_loss, test_acc = model.evaluate(X_test,  Y_test, verbose=2)
 
 print('\nTest accuracy:', test_acc)
 print('Skit accuracy:', skit_accuracy)
+
+#######################################################################################
+# Saving and loading trained Model:
+
+# Keras
+model.save("TTZ_TWZ_WZ_Keras_Model.h5")
+print("Saved model to disk")
+
+
+# keras
+from keras.models import load_model
+
+keras_model_loaded = load_model("TTZ_TWZ_WZ_Keras_Model.h5")
+pred = keras_model_loaded.predict(X_test[:3])
+print(pred)
+
+#######################################################################################
+# Plotting
+#######################################################################################
 
 '''
 # plot loss vs epoch
