@@ -130,7 +130,7 @@ from sklearn.multiclass import OneVsOneClassifier
 from sklearn.neural_network import MLPClassifier
 
 clf = OneVsOneClassifier(MLPClassifier(solver='adam', alpha=1e-5,
-    hidden_layer_sizes=(10,10), random_state=7, early_stopping=True,
+    hidden_layer_sizes=(5,5), random_state=7, early_stopping=True,
     max_iter=100000, activation='logistic'))
 clf.fit(X_train_val, Y_train_val)
 
@@ -158,18 +158,94 @@ print(clf.predict(X_test))
 
 import pickle
 pickle.dump(clf, open("TTZ_TWZ_WZ_sklearn_Model.sav", 'wb'))
-
+pickle.dump(scaler, open("TTZ_TWZ_WZ_sklearn_skaler.sav", 'wb'))
 
 #load
 sklearn_model_loaded = pickle.load(open("TTZ_TWZ_WZ_sklearn_Model.sav", 'rb'))
+scaler_loaded = pickle.load(open("TTZ_TWZ_WZ_sklearn_skaler.sav", 'rb'))
 #result = sklearn_model_loaded.score(X_test, Y_test)
 #print(result)
+#X_test = scaler_loaded.transform(X_test)
 pred = sklearn_model_loaded.predict(X_test[:3])
 print(pred)
 
 #######################################################################################
+# Plot
+
+Y_predict = clf.decision_function(X_test)
+
+from sklearn.metrics import roc_curve, auc
+
+from sklearn.preprocessing import label_binarize
+Y_test_bin = label_binarize(Y_test, classes=[0,1,2])
+
+fpr = dict()
+tpr = dict()
+roc_auc = dict()
+for i in range(3):
+    fpr[i], tpr[i], _ = roc_curve(Y_test_bin[:, i], Y_predict[:, i])
+    roc_auc[i] = auc(fpr[i], tpr[i])
+
+# Compute micro-average ROC curve and ROC area
+fpr["micro"], tpr["micro"], _ = roc_curve(Y_test_bin.ravel(), Y_predict.ravel())
+roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+
+
+# First aggregate all false positive rates
+all_fpr = np.unique(np.concatenate([fpr[i] for i in range(3)]))
+
+
+# Then interpolate all ROC curves at this points
+mean_tpr = np.zeros_like(all_fpr)
+for i in range(3):
+    mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+
+# Finally average it and compute AUC
+mean_tpr /= 3
+lw = 2
+fpr["macro"] = all_fpr
+tpr["macro"] = mean_tpr
+roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+# Plot all ROC curves
+plt.figure()
+plt.plot(fpr["micro"], tpr["micro"],
+         label='micro-average ROC curve (area = {0:0.2f})'
+               ''.format(roc_auc["micro"]),
+         color='deeppink', linestyle=':', linewidth=4)
+
+plt.plot(fpr["macro"], tpr["macro"],
+         label='macro-average ROC curve (area = {0:0.2f})'
+               ''.format(roc_auc["macro"]),
+         color='navy', linestyle=':', linewidth=4)
+
+from itertools import cycle
+
+colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+for i, color in zip(range(3), colors):
+    plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+             label='ROC curve of class {0} (area = {1:0.2f})'
+             ''.format(i, roc_auc[i]))
+
+plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Some extension of Receiver operating characteristic to multi-class sklearn')
+plt.legend(loc="lower right")
+plt.savefig('plots/ROC_sklearn_all.png')
+
+
+
+
+
+#######################################################################################
 # Compare with Keras One versus All:
 #######################################################################################
+
+NDIM = len(VARS)
 
 df['TWZ']['isSignal'] = np.ones(len(df['TWZ'])) * 0
 df['TTZ']['isSignal'] = np.ones(len(df['TTZ'])) * 1
@@ -181,21 +257,12 @@ df_all = pd.concat([df['TTZ'], df['TWZ'], df['WZ']])
 dataset = df_all.values
 X = dataset[:,0:NDIM]
 Y = dataset[:,NDIM]
-Ymat = np.zeros((len(Y),3))
-for i, y in enumerate(Y):
-    if y == 0:
-        Ymat[i] = np.array([1,0,0])
-    elif y == 1:
-        Ymat[i] = np.array([0,1,0])
-    elif y == 2:
-        Ymat[i] = np.array([0,0,1])
-    else:
-        print('ERROR')
 
-Y = Ymat
+from sklearn.preprocessing import label_binarize
+Y = label_binarize(Y, classes=[0,1,2])
 
+from sklearn.model_selection import train_test_split
 X_train_val, X_test, Y_train_val, Y_test = train_test_split(X, Y, test_size=0.2, random_state=7)
-
 
 
 # baseline keras model
@@ -223,7 +290,7 @@ callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=2)
 history = model.fit(X_train_val, 
                     Y_train_val, 
                     epochs=1000, 
-                    batch_size=1024,
+                    batch_size=1024*6,
                     #verbose=0, # switch to 1 for more verbosity, 'silences' the output
                     callbacks=[callback],
                     #validation_split=0.25
@@ -271,10 +338,87 @@ ax.plot(history.history['val_accuracy'], label='val_acc')
 ax.legend(loc="upper left")
 ax.set_xlabel('epoch')
 ax.set_ylabel('acc')
-
+'''
 # Plot ROC
 Y_predict = model.predict(X_test)
 from sklearn.metrics import roc_curve, auc
+
+fpr = dict()
+tpr = dict()
+roc_auc = dict()
+for i in range(3):
+    fpr[i], tpr[i], _ = roc_curve(Y_test[:, i], Y_predict[:, i])
+    roc_auc[i] = auc(fpr[i], tpr[i])
+
+# Compute micro-average ROC curve and ROC area
+fpr["micro"], tpr["micro"], _ = roc_curve(Y_test.ravel(), Y_predict.ravel())
+roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+'''
+#eine Einzelne ROC - Kurve
+plt.figure()
+lw = 2
+plt.plot(fpr[2], tpr[2], color='darkorange',
+         lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])
+plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic example')
+plt.legend(loc="lower right")
+plt.savefig('plots/ROC_keras.png')
+'''
+###########################################################################
+# First aggregate all false positive rates
+all_fpr = np.unique(np.concatenate([fpr[i] for i in range(3)]))
+
+
+# Then interpolate all ROC curves at this points
+mean_tpr = np.zeros_like(all_fpr)
+for i in range(3):
+    mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+
+# Finally average it and compute AUC
+mean_tpr /= 3
+lw = 2
+fpr["macro"] = all_fpr
+tpr["macro"] = mean_tpr
+roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+# Plot all ROC curves
+plt.figure()
+plt.plot(fpr["micro"], tpr["micro"],
+         label='micro-average ROC curve (area = {0:0.2f})'
+               ''.format(roc_auc["micro"]),
+         color='deeppink', linestyle=':', linewidth=4)
+
+plt.plot(fpr["macro"], tpr["macro"],
+         label='macro-average ROC curve (area = {0:0.2f})'
+               ''.format(roc_auc["macro"]),
+         color='navy', linestyle=':', linewidth=4)
+
+from itertools import cycle
+
+colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+for i, color in zip(range(3), colors):
+    plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+             label='ROC curve of class {0} (area = {1:0.2f})'
+             ''.format(i, roc_auc[i]))
+
+plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Some extension of Receiver operating characteristic to multi-class Keras')
+plt.legend(loc="lower right")
+plt.savefig('plots/ROC_keras_all.png')
+
+
+
+
+'''
+#######################################################
 fpr, tpr, thresholds = roc_curve(Y_test, Y_predict)
 roc_auc = auc(fpr, tpr)
 ax = plt.subplot(2, 2, 3)
@@ -290,6 +434,5 @@ plt.show()
 
 
 df_all['dense'] = model.predict(X) # add prediction to array
-print(df_all.iloc[:5])
+print(df_all.iloc[:5])'''
 
-'''
