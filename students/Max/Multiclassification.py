@@ -305,7 +305,7 @@ print('\nTest accuracy:', test_acc)
 filename = "TTZ_TWZ_WZ_Keras_Model"
 model.save(filename + '.h5')
 with open( filename + '.pkl', 'wb') as f:
-    pickle.dump( model.get_weights(), f )
+    pickle.dump( model.get_weights(), f, protocol=2)
 print("Saved model to disk")
 
 
