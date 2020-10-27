@@ -52,7 +52,8 @@ import pickle, os
 local_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
 
 #model.set_weights(pickle.load(file(os.path.join( local_dir, "TTZ_TWZ_WZ_Keras_Model.pkl"))))
-
+# this must work in python 2 and 3 :-)
+>>>>>>> 75cbc034d002a577c28aa786628f4a10c59ece70
 with open( os.path.join( local_dir, "TTZ_TWZ_WZ_Keras_Model.pkl"), 'rb') as f:
     model.set_weights(pickle.load(f))
 
