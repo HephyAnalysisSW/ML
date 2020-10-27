@@ -1,4 +1,3 @@
-
 variables = ['mva_Z1_eta',
         'mva_jet2_btagDeepB',
         'mva_jet0_btagDeepB',
@@ -31,7 +30,7 @@ variables = ['mva_Z1_eta',
         'mva_W_pt']
 
 from keras.models import load_model
-model = load_model("TTZ_TWZ_WZ_Keras_Model.h5")
+model = load_model("TTZ_TWZ_WZ_keras_model.h5")
 
-if __name__ == "__main__":
-    print(pred)
+#if __name__ == "__main__":
+#    print(pred)
