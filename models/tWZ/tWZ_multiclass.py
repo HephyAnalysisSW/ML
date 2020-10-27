@@ -30,7 +30,25 @@ variables = ['mva_Z1_eta',
         'mva_W_pt']
 
 from keras.models import load_model
-model = load_model("TTZ_TWZ_WZ_keras_model.h5")
+#model = load_model("TTZ_TWZ_WZ_keras_model.h5")
+
+from keras.models import Sequential, Model
+from keras.optimizers import SGD
+from keras.layers import Input, Activation, Dense, Convolution2D, MaxPooling2D, Dropout, Flatten
+from keras.layers import BatchNormalization
+from keras.utils import np_utils
+
+NDIM = len(variables)
+model = Sequential([Flatten(input_shape=(NDIM, 1)),
+                    BatchNormalization(),
+                    Dense(NDIM*5, activation='sigmoid'),
+                    Dense(NDIM*5, activation='sigmoid'),
+                    Dense(NDIM*5, activation='sigmoid'),
+                    Dense(3,kernel_initializer='normal', activation='sigmoid')])
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.summary()
+
+#model.set_weights("TTZ_TWZ_WZ_keras_model.pkl")
 
 #if __name__ == "__main__":
 #    print(pred)
