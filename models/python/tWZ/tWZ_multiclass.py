@@ -51,7 +51,10 @@ model.summary()
 import pickle, os
 local_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
 
-model.set_weights(pickle.load(file(os.path.join( local_dir, "TTZ_TWZ_WZ_Keras_Model.pkl"))))
+#model.set_weights(pickle.load(file(os.path.join( local_dir, "TTZ_TWZ_WZ_Keras_Model.pkl"))))
+
+with open( os.path.join( local_dir, "TTZ_TWZ_WZ_Keras_Model.pkl"), 'rb') as f:
+    model.set_weights(pickle.load(f))
 
 #if __name__ == "__main__":
 #    print(pred)
