@@ -2,6 +2,7 @@ import uproot
 import numpy as np
 import pandas as pd
 import h5py
+import pickle
 
 # fix random seed for reproducibility
 seed = 7
@@ -98,154 +99,149 @@ for i, j in enumerate(VARS):
     plt.close()
 
 
-#######################################################################################
-# sklearn Teil
-#######################################################################################
-
+########################################################################################
+## sklearn Teil
+########################################################################################
+#
+#
+#NDIM = len(VARS)
+#
+#df['TWZ']['isSignal'] = np.ones(len(df['TWZ'])) * 0
+#df['TTZ']['isSignal'] = np.ones(len(df['TTZ'])) * 1
+#df['WZ']['isSignal'] = np.ones(len(df['WZ'])) * 2
+#df_all = pd.concat([df['TWZ'], df['TTZ'], df['WZ']])
+#dataset = df_all.values
+#X = dataset[:,0:NDIM]
+#Y = dataset[:,NDIM]
+#
+#
+#
+## splitting the 3 Data sets into Train and Test Parts
+#from sklearn.model_selection import train_test_split
+#
+#X_train_val, X_test, Y_train_val, Y_test = train_test_split(X, Y, test_size=0.2, random_state=7)
+#
+## preprocessing: standard scalar
+#from sklearn.preprocessing import StandardScaler
+#scaler = StandardScaler().fit(X_train_val)
+#X_train_val = scaler.transform(X_train_val)
+#X_test = scaler.transform(X_test)
+#
+#from sklearn.multiclass import OneVsOneClassifier
+#from sklearn.neural_network import MLPClassifier
+#
+#clf = OneVsOneClassifier(MLPClassifier(solver='adam', alpha=1e-5,
+#    hidden_layer_sizes=(5,5), random_state=7, early_stopping=True,
+#    max_iter=100000, activation='logistic'))
+#clf.fit(X_train_val, Y_train_val)
+#
+#print(clf.predict(X_test[:20]))
+#print(Y_test[:20])
+#testlen = len(Y_test)
+#falsch = 0
+#richtig = 0
+#predicted = clf.predict(X_test)
+#for i in range(0, testlen):
+#    if Y_test[i] == predicted[i]:
+#        richtig += 1
+#    else:
+#        falsch += 1
+#
+#
+#skit_accuracy = richtig/testlen
+#print('Richtig Klassifiziert:', skit_accuracy)
+#print(richtig, falsch, testlen)
+#print(clf.predict(X_test))
+#
+#
+########################################################################################
+## Save trained Model:
+#
+#pickle.dump(clf, open("TTZ_TWZ_WZ_sklearn_Model.sav", 'wb'))
+#pickle.dump(scaler, open("TTZ_TWZ_WZ_sklearn_skaler.sav", 'wb'))
+#
+##load
+#sklearn_model_loaded = pickle.load(open("TTZ_TWZ_WZ_sklearn_Model.sav", 'rb'))
+#scaler_loaded = pickle.load(open("TTZ_TWZ_WZ_sklearn_skaler.sav", 'rb'))
+##result = sklearn_model_loaded.score(X_test, Y_test)
+##print(result)
+##X_test = scaler_loaded.transform(X_test)
+#pred = sklearn_model_loaded.predict(X_test[:3])
+#print(pred)
+#
+########################################################################################
+## Plot
+#
+#Y_predict = clf.decision_function(X_test)
+#
+#from sklearn.metrics import roc_curve, auc
+#
+#from sklearn.preprocessing import label_binarize
+#Y_test_bin = label_binarize(Y_test, classes=[0,1,2])
+#
+#fpr = dict()
+#tpr = dict()
+#roc_auc = dict()
+#for i in range(3):
+#    fpr[i], tpr[i], _ = roc_curve(Y_test_bin[:, i], Y_predict[:, i])
+#    roc_auc[i] = auc(fpr[i], tpr[i])
+#
+## Compute micro-average ROC curve and ROC area
+#fpr["micro"], tpr["micro"], _ = roc_curve(Y_test_bin.ravel(), Y_predict.ravel())
+#roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+#
+#
+#
+## First aggregate all false positive rates
+#all_fpr = np.unique(np.concatenate([fpr[i] for i in range(3)]))
+#
+#
+## Then interpolate all ROC curves at this points
+#mean_tpr = np.zeros_like(all_fpr)
+#for i in range(3):
+#    mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+#
+## Finally average it and compute AUC
+#mean_tpr /= 3
+#lw = 2
+#fpr["macro"] = all_fpr
+#tpr["macro"] = mean_tpr
+#roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+#
+## Plot all ROC curves
+#plt.figure()
+#plt.plot(fpr["micro"], tpr["micro"],
+#         label='micro-average ROC curve (area = {0:0.2f})'
+#               ''.format(roc_auc["micro"]),
+#         color='deeppink', linestyle=':', linewidth=4)
+#
+#plt.plot(fpr["macro"], tpr["macro"],
+#         label='macro-average ROC curve (area = {0:0.2f})'
+#               ''.format(roc_auc["macro"]),
+#         color='navy', linestyle=':', linewidth=4)
+#
+#from itertools import cycle
+#
+#colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+#for i, color in zip(range(3), colors):
+#    plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+#             label='ROC curve of class {0} (area = {1:0.2f})'
+#             ''.format(i, roc_auc[i]))
+#
+#plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+#plt.xlim([0.0, 1.0])
+#plt.ylim([0.0, 1.05])
+#plt.xlabel('False Positive Rate')
+#plt.ylabel('True Positive Rate')
+#plt.title('Some extension of Receiver operating characteristic to multi-class sklearn')
+#plt.legend(loc="lower right")
+#plt.savefig('plots/ROC_sklearn_all.png')
 
 NDIM = len(VARS)
-
-df['TWZ']['isSignal'] = np.ones(len(df['TWZ'])) * 0
-df['TTZ']['isSignal'] = np.ones(len(df['TTZ'])) * 1
-df['WZ']['isSignal'] = np.ones(len(df['WZ'])) * 2
-df_all = pd.concat([df['TWZ'], df['TTZ'], df['WZ']])
-dataset = df_all.values
-X = dataset[:,0:NDIM]
-Y = dataset[:,NDIM]
-
-
-
-# splitting the 3 Data sets into Train and Test Parts
-from sklearn.model_selection import train_test_split
-
-X_train_val, X_test, Y_train_val, Y_test = train_test_split(X, Y, test_size=0.2, random_state=7)
-
-# preprocessing: standard scalar
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler().fit(X_train_val)
-X_train_val = scaler.transform(X_train_val)
-X_test = scaler.transform(X_test)
-
-from sklearn.multiclass import OneVsOneClassifier
-from sklearn.neural_network import MLPClassifier
-
-clf = OneVsOneClassifier(MLPClassifier(solver='adam', alpha=1e-5,
-    hidden_layer_sizes=(5,5), random_state=7, early_stopping=True,
-    max_iter=100000, activation='logistic'))
-clf.fit(X_train_val, Y_train_val)
-
-print(clf.predict(X_test[:20]))
-print(Y_test[:20])
-testlen = len(Y_test)
-falsch = 0
-richtig = 0
-predicted = clf.predict(X_test)
-for i in range(0, testlen):
-    if Y_test[i] == predicted[i]:
-        richtig += 1
-    else:
-        falsch += 1
-
-
-skit_accuracy = richtig/testlen
-print('Richtig Klassifiziert:', skit_accuracy)
-print(richtig, falsch, testlen)
-print(clf.predict(X_test))
-
-
-#######################################################################################
-# Save trained Model:
-
-import pickle
-pickle.dump(clf, open("TTZ_TWZ_WZ_sklearn_Model.sav", 'wb'))
-pickle.dump(scaler, open("TTZ_TWZ_WZ_sklearn_skaler.sav", 'wb'))
-
-#load
-sklearn_model_loaded = pickle.load(open("TTZ_TWZ_WZ_sklearn_Model.sav", 'rb'))
-scaler_loaded = pickle.load(open("TTZ_TWZ_WZ_sklearn_skaler.sav", 'rb'))
-#result = sklearn_model_loaded.score(X_test, Y_test)
-#print(result)
-#X_test = scaler_loaded.transform(X_test)
-pred = sklearn_model_loaded.predict(X_test[:3])
-print(pred)
-
-#######################################################################################
-# Plot
-
-Y_predict = clf.decision_function(X_test)
-
-from sklearn.metrics import roc_curve, auc
-
-from sklearn.preprocessing import label_binarize
-Y_test_bin = label_binarize(Y_test, classes=[0,1,2])
-
-fpr = dict()
-tpr = dict()
-roc_auc = dict()
-for i in range(3):
-    fpr[i], tpr[i], _ = roc_curve(Y_test_bin[:, i], Y_predict[:, i])
-    roc_auc[i] = auc(fpr[i], tpr[i])
-
-# Compute micro-average ROC curve and ROC area
-fpr["micro"], tpr["micro"], _ = roc_curve(Y_test_bin.ravel(), Y_predict.ravel())
-roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-
-
-
-# First aggregate all false positive rates
-all_fpr = np.unique(np.concatenate([fpr[i] for i in range(3)]))
-
-
-# Then interpolate all ROC curves at this points
-mean_tpr = np.zeros_like(all_fpr)
-for i in range(3):
-    mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
-
-# Finally average it and compute AUC
-mean_tpr /= 3
-lw = 2
-fpr["macro"] = all_fpr
-tpr["macro"] = mean_tpr
-roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
-
-# Plot all ROC curves
-plt.figure()
-plt.plot(fpr["micro"], tpr["micro"],
-         label='micro-average ROC curve (area = {0:0.2f})'
-               ''.format(roc_auc["micro"]),
-         color='deeppink', linestyle=':', linewidth=4)
-
-plt.plot(fpr["macro"], tpr["macro"],
-         label='macro-average ROC curve (area = {0:0.2f})'
-               ''.format(roc_auc["macro"]),
-         color='navy', linestyle=':', linewidth=4)
-
-from itertools import cycle
-
-colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
-for i, color in zip(range(3), colors):
-    plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-             label='ROC curve of class {0} (area = {1:0.2f})'
-             ''.format(i, roc_auc[i]))
-
-plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('Some extension of Receiver operating characteristic to multi-class sklearn')
-plt.legend(loc="lower right")
-plt.savefig('plots/ROC_sklearn_all.png')
-
-
-
-
 
 #######################################################################################
 # Compare with Keras One versus All:
 #######################################################################################
-
-NDIM = len(VARS)
 
 df['TWZ']['isSignal'] = np.ones(len(df['TWZ'])) * 0
 df['TTZ']['isSignal'] = np.ones(len(df['TTZ'])) * 1
@@ -300,13 +296,16 @@ history = model.fit(X_train_val,
 test_loss, test_acc = model.evaluate(X_test,  Y_test, verbose=2)
 
 print('\nTest accuracy:', test_acc)
-print('Skit accuracy:', skit_accuracy)
+#print('Skit accuracy:', skit_accuracy)
 
 #######################################################################################
 # Saving and loading trained Model:
 
 # Keras
-model.save("TTZ_TWZ_WZ_Keras_Model.h5")
+filename = "TTZ_TWZ_WZ_Keras_Model"
+model.save(filename + '.h5')
+with open( filename + '.pkl', 'wb') as f:
+    pickle.dump( model.get_weights(), f )
 print("Saved model to disk")
 
 
