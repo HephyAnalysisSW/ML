@@ -48,7 +48,8 @@ model = Sequential([Flatten(input_shape=(NDIM, 1)),
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 model.summary()
 
-#model.set_weights("TTZ_TWZ_WZ_keras_model.pkl")
+import pickle
+model.set_weights(pickle.load(file("TTZ_TWZ_WZ_Keras_Model.pkl")))
 
 #if __name__ == "__main__":
 #    print(pred)
