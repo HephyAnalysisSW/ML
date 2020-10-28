@@ -1,0 +1,15 @@
+name: gpu
+channels:
+  - conda-forge
+  - default
+dependencies:
+  - python=3.8
+  - keras
+  - tensorflow-gpu
+  - pandas
+  - uproot
+  - root
+  - ipython
+  - matplotlib
+  - root_numpy
+  - scikit-learn
