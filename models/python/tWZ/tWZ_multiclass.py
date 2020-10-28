@@ -31,22 +31,20 @@ variables = ['mva_Z1_eta',
 
 output_specification = ['TWZ', 'TTZ', 'WZ']
 
-from keras.models import load_model
-#model = load_model("TTZ_TWZ_WZ_keras_model.h5")
 
-from keras.models import Sequential, Model
-from keras.optimizers import SGD
-from keras.layers import Input, Activation, Dense, Convolution2D, MaxPooling2D, Dropout, Flatten
-from keras.layers import BatchNormalization
-from keras.utils import np_utils
-
-NDIM = len(variables)
-#model = Sequential([Flatten(input_shape=(NDIM, 1)),
-#                    BatchNormalization(),
-#                    Dense(NDIM*5, activation='sigmoid'),
-#                    Dense(NDIM*5, activation='sigmoid'),
-#                    Dense(NDIM*5, activation='sigmoid'),
-#                    Dense(3,kernel_initializer='normal', activation='sigmoid')])
+#from keras.models import Sequential, Model
+#from keras.optimizers import SGD
+#from keras.layers import Input, Activation, Dense, Convolution2D, MaxPooling2D, Dropout, Flatten
+#from keras.layers import BatchNormalization
+#from keras.utils import np_utils
+#
+#NDIM = len(variables)
+##model = Sequential([Flatten(input_shape=(NDIM, 1)),
+##                    BatchNormalization(),
+##                    Dense(NDIM*5, activation='sigmoid'),
+##                    Dense(NDIM*5, activation='sigmoid'),
+##                    Dense(NDIM*5, activation='sigmoid'),
+##                    Dense(3,kernel_initializer='normal', activation='sigmoid')])
 #model = Sequential([
 #                    #Flatten(input_shape=(NDIM, 1)), # instead of (NDIM,1)
 #                    BatchNormalization(input_shape=(NDIM, )),
@@ -55,17 +53,8 @@ NDIM = len(variables)
 #                    Dense(NDIM*5, activation='sigmoid'),
 #                    Dense(3,kernel_initializer='normal', activation='sigmoid')
 #                    ])
-#model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-#model.summary()
-
-import os
-local_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
-model = load_model(os.path.join( local_dir, "TTZ_TWZ_WZ_Keras_Model.h5") )
-
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-model.summary()
-
 #import pickle, os
+#import numpy as np
 #local_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
 #
 #filename = "TTZ_TWZ_WZ_Keras_Model.pkl"
@@ -74,9 +63,19 @@ model.summary()
 #with open( full_filename, 'rb') as f:
 #    model.set_weights(pickle.load(f))
 #    print ("Loaded weights from %s"%full_filename)
+#model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+#model.summary()
+
+import os
+import numpy as np
+from keras.models import load_model
+local_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
+model = load_model(os.path.join( local_dir, "TTZ_TWZ_WZ_Keras_Model.h5") )
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.summary()
 
 if __name__ == "__main__":
-    import numpy as np
     inputs = [[2.2721688747406006, -10.0, -10.0, -1.0, 263.69891357421875, -0.9794921875,
             -0.03838849067687988,
             0.0, -1.0, -1.0, 0.0, 72.53070831298828, -10.0, -1.0, 7.966670989990234,
