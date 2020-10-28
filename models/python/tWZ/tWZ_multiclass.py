@@ -29,6 +29,8 @@ variables = ['mva_Z1_eta',
         'mva_jet0_pt',
         'mva_W_pt']
 
+output_specification = ['TWZ', 'TTZ', 'WZ']
+
 from keras.models import load_model
 #model = load_model("TTZ_TWZ_WZ_keras_model.h5")
 
