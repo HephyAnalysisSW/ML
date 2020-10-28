@@ -39,7 +39,7 @@ from keras.layers import BatchNormalization
 from keras.utils import np_utils
 
 NDIM = len(variables)
-model = Sequential([Flatten(input_shape=(NDIM, )),
+model = Sequential([Flatten(input_shape=(NDIM, 1)),
                     BatchNormalization(),
                     Dense(NDIM*5, activation='sigmoid'),
                     Dense(NDIM*5, activation='sigmoid'),
@@ -65,5 +65,5 @@ if __name__ == "__main__":
             2.1394686698913574, -10.0, 0.0, -1.0, 0.0, 0.0, -1.0, -10.0, -10.0,
             -1.0, 3.892380475997925, 93.152099609375, -1.0, 0.0, 39.12520980834961]]
     import numpy as np
-    pred = model.predict(np.array(inputs))
+    pred = model.predict(np.array([inputs]))
     print(pred)
