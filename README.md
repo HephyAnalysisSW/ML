@@ -1,13 +1,13 @@
 Machine learning outside CMSSW
 
-Conda on hepgpu01:
+## Conda on hepgpu01.hephty.oeaw.ac.at:
 ```
 source /local/HephyML/setup.sh
 conda env create --file environment-tf16.yml
 conda activate tf16
 ```
 
-Conda on CBE:
+## Conda on cbe.vbc.ac.at:
 Make a ~/.condarc file with:
 ```
 envs_dirs:
