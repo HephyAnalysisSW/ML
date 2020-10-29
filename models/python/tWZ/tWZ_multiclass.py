@@ -67,7 +67,6 @@ output_specification = ['TWZ', 'TTZ', 'WZ']
 #model.summary()
 
 import os
-import numpy as np
 from keras.models import load_model
 local_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
 model = load_model(os.path.join( local_dir, "TTZ_TWZ_WZ_Keras_Model.h5") )
@@ -76,6 +75,7 @@ model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']
 model.summary()
 
 if __name__ == "__main__":
+    import numpy as np
     inputs = [[2.2721688747406006, -10.0, -10.0, -1.0, 263.69891357421875, -0.9794921875,
             -0.03838849067687988,
             0.0, -1.0, -1.0, 0.0, 72.53070831298828, -10.0, -1.0, 7.966670989990234,
