@@ -10,6 +10,7 @@ conda activate tf16
 ## Conda on cbe.vbc.ac.at:
 Make a ~/.condarc file with:
 ```
+auto_activate_base: false
 envs_dirs:
   - /scratch-cbe/users/<username>/conda/envs
 pkgs_dirs:
