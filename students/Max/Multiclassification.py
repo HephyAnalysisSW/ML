@@ -268,13 +268,21 @@ from keras.layers import Input, Activation, Dense, Convolution2D, MaxPooling2D, 
 from keras.layers import BatchNormalization
 from keras.utils import np_utils
 
+#model = Sequential([Flatten(input_shape=(NDIM, 1)), # instead of (NDIM,1)
+#                    BatchNormalization(),
+#                    Dense(NDIM*5, activation='sigmoid'),
+#                    Dense(NDIM*5, activation='sigmoid'),
+#                    Dense(NDIM*5, activation='sigmoid'),
+#                    Dense(3,kernel_initializer='normal', activation='sigmoid')])
 
-model = Sequential([Flatten(input_shape=(NDIM, 1)),
-                    BatchNormalization(),
+model = Sequential([
+                    #Flatten(input_shape=(NDIM, 1)), # instead of (NDIM,1)
+                    BatchNormalization(input_shape=(NDIM, )),
                     Dense(NDIM*5, activation='sigmoid'),
                     Dense(NDIM*5, activation='sigmoid'),
                     Dense(NDIM*5, activation='sigmoid'),
-                    Dense(3,kernel_initializer='normal', activation='sigmoid')])
+                    Dense(3,kernel_initializer='normal', activation='sigmoid')
+                    ])
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 model.summary()
 

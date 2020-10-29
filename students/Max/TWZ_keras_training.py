@@ -1,3 +1,8 @@
+#######################################################################################
+#
+# This trainig code should on CPU and GPU, 
+#
+#######################################################################################
 import uproot
 import numpy as np
 import pandas as pd
@@ -57,7 +62,7 @@ upfile['WZ'] = uproot.open(filename['WZ'])
 
 df['TTZ'] = upfile['TTZ'][treename].pandas.df(branches=VARS)
 df['TWZ'] = upfile['TWZ'][treename].pandas.df(branches=VARS)
-df['WZ'] = upfile['WZ'][treename].pandas.df(branches=VARS)
+df['WZ']  =  upfile['WZ'][treename].pandas.df(branches=VARS)
 
 
 # Plots of the Input parameters
@@ -127,8 +132,7 @@ from keras.layers import BatchNormalization
 from keras.utils import np_utils
 
 
-model = Sequential([Flatten(input_shape=(NDIM, 1)),
-                    BatchNormalization(),
+model = Sequential([BatchNormalization(input_shape=(NDIM, )),
                     Dense(NDIM*5, activation='sigmoid'),
                     Dense(NDIM*5, activation='sigmoid'),
                     Dense(NDIM*5, activation='sigmoid'),
@@ -157,20 +161,21 @@ print('\nTest accuracy:', test_acc)
 
 
 # save Model:
-filename = 'TTZ_TWZ_WZ_keras_model_weights'
 
 
-model.save("TTZ_TWZ_WZ_Keras_Model.h5")
+model.save("tWZ_keras_model.h5")
 print("Saved model to disk")
 
 
 from keras.models import load_model
 model = load_model("TTZ_TWZ_WZ_Keras_Model.h5")
+
 weights = model.get_weights()
 
 import pickle
-pickle.dump(weights, open(filename + '.pkl', 'w'))
-weights_loaded = 
+filename = 'tWZ_keras_model_weights'
+pickle.dump(weights, open(filename + '.pkl', 'bw'))
+
 
 
 
@@ -193,7 +198,7 @@ for i in range(3):
 fpr["micro"], tpr["micro"], _ = roc_curve(Y_test.ravel(), Y_predict.ravel())
 roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
-###########################################################################
+#######################################################################################
 # First aggregate all false positive rates
 all_fpr = np.unique(np.concatenate([fpr[i] for i in range(3)]))
 
@@ -240,6 +245,7 @@ plt.legend(loc="lower right")
 plt.savefig('plots/ROC_keras_all.png')
 
 
+#######################################################################################
 # confusion Matrix
 
 Y_pred_label = np.zeros(len(Y_predict))
@@ -259,7 +265,9 @@ cmatkeras = confusion_matrix(Y_test_label, Y_pred_label, normalize='true')
 
 print(cmatkeras)
 
-# Signal vs Noise:
+
+#######################################################################################
+# Signal vs Rest (Noise):
 
 Y_predict_sn = np.zeros((len(Y_predict), 2))
 Y_predict_sn[:,0] = Y_predict[:,0]
@@ -279,6 +287,8 @@ plt.title('Some extension of Receiver operating characteristic to multi-class Ke
 plt.legend(loc="lower right")
 plt.savefig('plots/ROC_keras_sn.png')
 
+
+#######################################################################################
 # Confusion Matrix with threshhold:
 
 Y_test_label_threshhold = Y_test_label

@@ -1,0 +1,16 @@
+name: tf16-gpu
+channels:
+  - conda-forge
+  - default
+dependencies:
+  - python
+  - keras=2.1.4
+  - tensorflow-gpu=1.6.0
+  - numpy<=1.16
+  - pandas
+  - uproot
+  - ipython
+  - matplotlib
+  - root_numpy
+  - scikit-learn
+  - root
