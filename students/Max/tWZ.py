@@ -48,6 +48,6 @@ NDIM = len(variables)
 # Network layout:
 NL = [NDIM*5, NDIM*5, NDIM*5]
 
-make_plots = True
-make_roc = True
-make_conf = True
+make_plots = True # Histogram plots
+make_roc = True # ROC curve plot
+make_conf = True # print confusion matrix

@@ -2,8 +2,8 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("config_path", help="enter the name of the config file")
 
-args = parser.parse_args().config_path
-config = args.config_path
+config = parser.parse_args().config_path
+print(config)
 
 ##########################################################################################
 import uproot
@@ -139,7 +139,7 @@ history = model.fit(X_train_val,
 
 # saving
 
-model.save(model_path + 'keras_model.h5')
+model.save(model_path +config + '_keras_model.h5')
 
 
 # trainig finished, now plotting roc and calculating confusion matrix
