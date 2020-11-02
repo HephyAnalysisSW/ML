@@ -189,7 +189,8 @@ if make_roc:
     #
     from itertools import cycle
     #
-    colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+    colors = cycle(['aqua', 'darkorange', 'cornflowerblue', 'indigo', 'darkgreen', 'crimson',
+        'sienna', 'darkmagenta', 'darkslatergrey', 'maroon', 'olive', 'purple'])
     for i, color in zip(range(len(filename)), colors):
         plt.plot(fpr[i], tpr[i], color=color, lw=lw,
                  label=key_list[i] + ' area =' + str(roc_auc[i]))

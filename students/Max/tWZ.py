@@ -32,6 +32,8 @@ variables = ['mva_Z1_eta',
 treename = 'Events'
 filename = {}
 
+
+# key is used as name on the plot
 filename['TWZ'] = '/local/mmoser/root_files/TWZ_NLO_DR.root'
 filename['TTZ'] = '/local/mmoser/root_files/TTZ.root'
 filename['WZ'] = '/local/mmoser/root_files/WZ.root'
