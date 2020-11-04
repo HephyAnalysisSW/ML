@@ -34,6 +34,7 @@ try:
     make_roc = module.make_roc
     make_conf = module.make_conf
     batch_size = module.batch_size
+    make_impo = module.make_impo
 except:
     print('One or more required variables in the config file missing.')
     print('variable list:')
@@ -251,5 +252,68 @@ if make_conf:
     #
     print(np.array(cmat))
 
+
+if make_impo:
+    print('Start importance')
+    #
+    shuff_list = []
+    scores = model.evaluate(X_train_val, Y_train_val, verbose=0, batch_size = 1024*8)
+    #
+    for i, var in enumerate(variables):
+        print(i+1, 'of', len(variables))
+        X_train_shuff = X_train_val.copy()
+        X_train_shuff = np.array(X_train_shuff)
+        np.random.shuffle(X_train_shuff[:,i])
+        scores_shuff = model.evaluate(X_train_shuff, Y_train_val, verbose=0, batch_size = 1024*8)
+        shuff_list.append(scores_shuff)
+    #
+    dif_ac = [] #accuracy
+    dif_sc = [] #score
+    #
+    for sh in shuff_list:
+        dif_sc.append(sh[0] - scores[0])
+        dif_ac.append(scores[1] - sh[1])
+    #
+    var_ac = variables.copy()
+    var_sc = variables.copy()
+    #
+    dif_ac, var_ac = (list(t) for t in zip(*sorted(zip(dif_ac, var_ac), reverse = True)))
+    dif_sc, var_sc = (list(t) for t in zip(*sorted(zip(dif_sc, var_sc), reverse = True)))
+    #
+    dif_ac = np.array(dif_ac)
+    dif_sc = np.array(dif_sc)
+    dif_ac /= np.max(dif_ac)
+    dif_sc /= np.max(dif_sc)
+    #
+    for i, a, s in zip(range(len(dif_ac)), dif_ac, dif_sc):
+        dif_ac[i] = int(a * 10000) / 10000
+        dif_sc[i] = int(s * 10000) / 10000
+    #
+    import matplotlib.pyplot as plt
+    #
+    def autolabel(rects, bar_label):
+        for idx,rect in enumerate(bar_plot):
+            height = rect.get_height()
+            ax.text(rect.get_x() + rect.get_width()/2., 1.05*height,
+                    bar_label[idx],
+                    ha='center', va='bottom', rotation=90)
+    #
+    plt.clf()
+    plt.cla()
+    fig, ax = plt.subplots()
+    bar_plot = plt.bar(list(range(len(var_ac))), dif_ac)
+    autolabel(bar_plot, var_ac)
+    plt.ylim(0,2)
+    plt.title('Permutation importance of variables with accuracy as metric')
+    plt.savefig("/local/mmoser/plots/importance_accuracy.png")
+    #
+    plt.clf()
+    plt.cla()
+    fig, ax = plt.subplots()
+    bar_plot = plt.bar(list(range(len(var_sc))), dif_sc)
+    autolabel(bar_plot, var_sc)
+    plt.ylim(0,2)
+    plt.title('Permutation importance of variables with score as metric')
+    plt.savefig("/local/mmoser/plots/importance_score.png")
 
 

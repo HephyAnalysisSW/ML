@@ -54,3 +54,4 @@ NL = [NDIM*5, NDIM*5, NDIM*5]
 make_plots = True # Histogram plots
 make_roc = True # ROC curve plot
 make_conf = True # print confusion matrix
+make_impo = True # calculate importance of features
