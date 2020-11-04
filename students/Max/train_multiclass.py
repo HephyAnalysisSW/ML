@@ -78,6 +78,12 @@ if len(filename) > 1:
     for i in range(2, len(filename)):
         df_all = pd.concat([df_all, df[key_list[i]]])
 
+for var in variables:
+    if df_all[var].isnull().values.any() == True:
+        print(var, ' has some entries as nan:')
+        print(df_all[var].isnull().sum(), ' are nan')
+        print('nan Events will be removed')
+
 df_all = df_all.dropna() # removes all Events with nan
 
 dataset = df_all.values
@@ -157,7 +163,7 @@ history = model.fit(X_train_val,
                     #validation_split=0.25
                     validation_data=(X_test,Y_test)
                    )
-
+print('trainig finished')
 # saving
 
 model.save(model_path + config + '_keras_model.h5')
@@ -165,6 +171,7 @@ model.save(model_path + config + '_keras_model.h5')
 # trainig finished, now plotting roc and calculating confusion matrix
 
 if make_roc:
+    print('Start roc-plot')
     import matplotlib.pyplot as plt
     Y_predict = model.predict(X_test)
     from sklearn.metrics import roc_curve, auc
@@ -212,8 +219,10 @@ if make_roc:
     colors = cycle(['aqua', 'darkorange', 'cornflowerblue', 'indigo', 'darkgreen', 'crimson',
         'sienna', 'darkmagenta', 'darkslatergrey', 'maroon', 'olive', 'purple'])
     for i, color in zip(range(len(filename)), colors):
+        ra = int(roc_auc[i] * 100)
+        ra = ra / 100
         plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                 label=key_list[i] + ' area =' + str(roc_auc[i]))
+                 label=key_list[i] + ' area =' + str(ra))
     #
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
@@ -226,6 +235,7 @@ if make_roc:
 
 
 if make_conf:
+    print('Start confusion matrix')
     Y_pred_label = np.zeros(len(Y_predict))
     Y_test_label = np.zeros(len(Y_test))
     for i, y in enumerate(Y_predict):
@@ -233,9 +243,6 @@ if make_conf:
     #
     for i, y in enumerate(Y_test):
         Y_test_label[i] = np.argmax(y)
-    #
-    print(Y_pred_label)
-    print(Y_test_label)
     #
     from sklearn.metrics import confusion_matrix
     #
