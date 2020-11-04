@@ -13,17 +13,40 @@ import h5py
 
 # import config file
 import importlib
-module = importlib.import_module(config)
+import sys
 
-variables = module.variables
-treename = module.treename
-filename = module.filename
-model_path = module.model_path
-save_path = module.save_path
-NL = module.NL
-make_plots = module.make_plots
-make_roc = module.make_roc
-make_conf = module.make_conf
+try:
+    module = importlib.import_module(config)
+except:
+    print('File was not able to be imported.')
+    print('Use command to train:')
+    print('python train_multiclass.py tWZ')
+    sys.exit(1)
+
+try:
+    variables = module.variables
+    treename = module.treename
+    filename = module.filename
+    model_path = module.model_path
+    save_path = module.save_path
+    NL = module.NL
+    make_plots = module.make_plots
+    make_roc = module.make_roc
+    make_conf = module.make_conf
+    batch_size = module.batch_size
+except:
+    print('One or more required variables in the config file missing.')
+    print('variable list:')
+    print('variables  -> variables of the root tree, will be input variables for the training')
+    print('treename   -> name of the root tree')
+    print('filename   -> a dict with class names as key and path to root file as values')
+    print('model_path -> the path where to save the model')
+    print('save_path  -> the path where to save the plots')
+    print('NL         -> Network layout, list of number of nodes in hidden layer')
+    print('make_plots -> bool if histogram plots of all input variables should be made')
+    print('make_roc   -> bool if roc-curve  plot should be made')
+    print('make_conf  -> bool if confusion matrix should be made')
+    sys.exit(1)
 
 # fix random seed for reproducibility
 seed = 7
@@ -95,8 +118,6 @@ if make_plots:
         plt.close()
 
 
-
-
 # binarize class labels 
 from sklearn.preprocessing import label_binarize
 classes = range(len(filename))
@@ -130,7 +151,7 @@ callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=2)
 history = model.fit(X_train_val, 
                     Y_train_val, 
                     epochs=1000, 
-                    batch_size=1024,
+                    batch_size=batch_size,
                     #verbose=0, # switch to 1 for more verbosity, 'silences' the output
                     callbacks=[callback],
                     #validation_split=0.25
@@ -139,8 +160,7 @@ history = model.fit(X_train_val,
 
 # saving
 
-model.save(model_path +config + '_keras_model.h5')
-
+model.save(model_path + config + '_keras_model.h5')
 
 # trainig finished, now plotting roc and calculating confusion matrix
 

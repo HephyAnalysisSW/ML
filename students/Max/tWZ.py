@@ -32,6 +32,7 @@ variables = ['mva_Z1_eta',
 treename = 'Events'
 filename = {}
 
+batch_size = 1024*8
 
 # key is used as name on the plot
 filename['TWZ'] = '/local/mmoser/root_files/TWZ_NLO_DR.root'
