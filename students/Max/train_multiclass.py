@@ -78,11 +78,12 @@ if len(filename) > 1:
     for i in range(2, len(filename)):
         df_all = pd.concat([df_all, df[key_list[i]]])
 
-for var in variables:
-    if df_all[var].isnull().values.any() == True:
-        print(var, ' has some entries as nan:')
-        print(df_all[var].isnull().sum(), ' are nan')
-        print('nan Events will be removed')
+for key in key_list:
+    for var in variables:
+        if df[key][var].isnull().values.any() == True:
+            print(key,':', var, ' has some entries as nan:')
+            print(df[key][var].isnull().sum(), ' are nan')
+            print('nan Events will be removed')
 
 df_all = df_all.dropna() # removes all Events with nan
 
