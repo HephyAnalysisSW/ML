@@ -55,3 +55,4 @@ make_plots = True # Histogram plots
 make_roc = True # ROC curve plot
 make_conf = True # print confusion matrix
 make_impo = True # calculate importance of features
+make_outp = True # make output plots
