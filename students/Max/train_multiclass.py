@@ -224,14 +224,14 @@ if make_roc:
         ra = int(roc_auc[i] * 100)
         ra = ra / 100
         plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                 label=key_list[i] + ' area =' + str(ra))
+                 label=key_list[i] + ' (area = ' + str(ra) +')')
     #
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('Some extension of Receiver operating characteristic to multi-class Keras')
+    plt.title('Receiver operating characteristic for multi-class Keras')
     plt.legend(loc="lower right")
     plt.savefig(save_path + 'ROC_curve.png')
 
