@@ -22,31 +22,91 @@ except:
     print('Use command to train:')
     print('python train_multiclass.py tWZ')
     sys.exit(1)
+err_list = []
 
 try:
     variables = module.variables
-    treename = module.treename
+except:
+    err_list.append('variables')
+
+try:
+   treename = module.treename    
+except:
+    err_list.append('treename')
+
+try:
     filename = module.filename
+except:
+    err_list.append('filename')
+
+try:
     model_path = module.model_path
+except:
+    err_list.append('model_path')
+
+try:
     save_path = module.save_path
+except:
+    err_list.append('save_path')
+
+try:
     NL = module.NL
+except:
+    err_list.append('NL')
+    
+try:
     make_plots = module.make_plots
+except:
+    err_list.append('make_plots')
+
+try:
     make_roc = module.make_roc
+except:
+    err_list.append('make_roc')
+
+try:
     make_conf = module.make_conf
+except:
+    err_list.append('make_conf')
+
+try:
     batch_size = module.batch_size
+except:
+    err_list.append('batch_size')
+
+try:
     make_impo = module.make_impo
 except:
+    err_list.append('make_impo')
+
+try:
+    make_outp = module.make_outp
+except:
+    err_list.append('make_outp')
+
+try:
+    make_acc_loss = module.make_acc_loss
+except:
+    err_list.append('make_acc_loss')
+
+if err_list !=[]:
     print('One or more required variables in the config file missing.')
-    print('variable list:')
-    print('variables  -> variables of the root tree, will be input variables for the training')
-    print('treename   -> name of the root tree')
-    print('filename   -> a dict with class names as key and path to root file as values')
-    print('model_path -> the path where to save the model')
-    print('save_path  -> the path where to save the plots')
-    print('NL         -> Network layout, list of number of nodes in hidden layer')
-    print('make_plots -> bool if histogram plots of all input variables should be made')
-    print('make_roc   -> bool if roc-curve  plot should be made')
-    print('make_conf  -> bool if confusion matrix should be made')
+    print('missing variable list:')
+    print(err_list)
+    print()
+    print('variables     -> variables of the root tree, will be input variables for the training')
+    print('treename      -> name of the root tree')
+    print('filename      -> a dict with class names as key and path to root file as values')
+    print('model_path    -> the path where to save the model')
+    print('save_path     -> the path where to save the plots')
+    print('NL            -> Network layout, list of number of nodes in hidden layer')
+    print('make_plots    -> bool if histogram plots of all input variables should be made')
+    print('make_roc      -> bool if roc-curve  plot should be made')
+    print('make_conf     -> bool if confusion matrix should be made')
+    print('batch_size    -> batch size in training and model evaluation')
+    print('make_impo     -> make feature importance plots')
+    print('make_outp     -> make output plots')
+    print('make_acc_loss -> make ccuracy and loss plot of the training history')
     sys.exit(1)
 
 # fix random seed for reproducibility
@@ -108,12 +168,9 @@ if make_plots:
         minimum = min(minimuml)
         maximum = max(maximuml)
         # make histograms
-        a, b, c = plt.hist(df['TTZ'][j], bins=30, range=(minimum, maximum), label='TTZ',
-          density=True, histtype=u'step', linewidth=2)
-        a, b, c = plt.hist(df['TWZ'][j], bins=30, range=(minimum, maximum), label='TWZ',
-          density=True, histtype=u'step', linewidth=2, alpha=0.8)
-        a, b, c = plt.hist(df['WZ'][j], bins=30, range=(minimum, maximum), label='WZ',
-          density=True, histtype=u'step', linewidth=2, alpha=0.5)
+        for key in filename:
+            a, b, c = plt.hist(df[key][j], bins=30, range=(minimum, maximum), label=key,
+                density=True, histtype=u'step', linewidth=2)
         xlab = j
         xlab = xlab.replace('mva_', '')
         xlab = xlab.replace('_', ' ')
@@ -132,7 +189,7 @@ classes = range(len(filename))
 Y = label_binarize(Y, classes=classes)
 
 from sklearn.model_selection import train_test_split
-X_train_val, X_test, Y_train_val, Y_test = train_test_split(X, Y, test_size=0.2, random_state=7)
+X_train_val, X_test, Y_train_val, Y_test = train_test_split(X, Y, test_size=0.2, random_state=7, shuffle = True)
 
 # define model
 from keras.models import Sequential, Model
@@ -154,7 +211,7 @@ model.summary()
 
 # train the model
 import tensorflow as tf
-callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=2)
+callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=4)
 
 history = model.fit(X_train_val, 
                     Y_train_val, 
@@ -162,15 +219,37 @@ history = model.fit(X_train_val,
                     batch_size=batch_size,
                     #verbose=0, # switch to 1 for more verbosity, 'silences' the output
                     callbacks=[callback],
-                    #validation_split=0.25
-                    validation_data=(X_test,Y_test)
+                    validation_split=0.1
+                    #validation_data=(X_test,Y_test)
                    )
 print('trainig finished')
-# saving
 
+# saving
 model.save(model_path + config + '_keras_model.h5')
 
-# trainig finished, now plotting roc and calculating confusion matrix
+if make_acc_loss:
+    print('Star accuracy and loss plot')
+    import matplotlib.pyplot as plt
+    plt.clf()
+    plt.figure(figsize=(15, 6))
+    # score
+    ax = plt.subplot(1, 2, 1)
+    ax.plot(history.history['loss'], label='loss')
+    ax.plot(history.history['val_loss'], label='val_loss')
+    ax.legend(loc="upper right")
+    ax.set_xlabel('epoch')
+    ax.set_ylabel('loss')
+    ax.set_title('loss')
+    # accuraccy
+    ax = plt.subplot(1, 2, 2)
+    ax.plot(history.history['accuracy'], label='acc')
+    ax.plot(history.history['val_accuracy'], label='val_acc')
+    ax.legend(loc="lower right")
+    ax.set_xlabel('epoch')
+    ax.set_ylabel('acc')
+    ax.set_title('accuracy')
+    #
+    plt.savefig(save_path + 'acc_score.png')
 
 if make_roc:
     print('Start roc-plot')
@@ -237,6 +316,7 @@ if make_roc:
 
 
 if make_conf:
+    Y_predict = model.predict(X_test)
     print('Start confusion matrix')
     Y_pred_label = np.zeros(len(Y_predict))
     Y_test_label = np.zeros(len(Y_test))
@@ -297,7 +377,7 @@ if make_impo:
             ax.text(rect.get_x() + rect.get_width()/2., 1.05*height,
                     bar_label[idx],
                     ha='center', va='bottom', rotation=90)
-    #
+    # accuracy
     plt.clf()
     plt.cla()
     fig, ax = plt.subplots()
@@ -306,7 +386,7 @@ if make_impo:
     plt.ylim(0,2)
     plt.title('Permutation importance of variables with accuracy as metric')
     plt.savefig("/local/mmoser/plots/importance_accuracy.png")
-    #
+    # score
     plt.clf()
     plt.cla()
     fig, ax = plt.subplots()
@@ -315,5 +395,40 @@ if make_impo:
     plt.ylim(0,2)
     plt.title('Permutation importance of variables with score as metric')
     plt.savefig("/local/mmoser/plots/importance_score.png")
+
+
+if make_outp:
+    print('Start output plot')
+    import matplotlib.pyplot as plt
+    for i, key in enumerate(key_list):
+        print(i+1, 'of', len(key_list), 'plots')
+        plt.clf()
+        counter = 1
+        for key2 in key_list:
+            print(counter, 'of', len(key_list), 'histograms')
+            counter += 1
+            df_new = df[key2].copy()
+            df_new = df_new.dropna()
+            #
+            dataset = df_new.values
+            X = dataset[:,0:NDIM]
+            Y = dataset[:,NDIM]
+            #
+            from sklearn.preprocessing import label_binarize
+            classes = range(len(filename))
+            Y = label_binarize(Y, classes=classes)
+            #
+            Y_predict = model.predict(X)
+            #
+            a, b, c = plt.hist(Y_predict[:, i], range=(0, 1), density=True, histtype=u'step',
+                linewidth=2, bins=30, label=key2)
+        #
+        plt.xlabel('probability')
+        plt.ylabel('N')
+        plt.yscale('log')
+        plt.legend()
+        plt.title(key + ' output')
+        plt.savefig('/local/mmoser/plots/output_plot_' + key +'.png')
+
 
 

@@ -32,7 +32,7 @@ variables = ['mva_Z1_eta',
 treename = 'Events'
 filename = {}
 
-batch_size = 1024*8
+batch_size = 1024*4
 
 # key is used as name on the plot
 filename['TWZ'] = '/local/mmoser/root_files/TWZ_NLO_DR.root'
@@ -52,6 +52,7 @@ NDIM = len(variables)
 NL = [NDIM*5, NDIM*5, NDIM*5]
 
 make_plots = True # Histogram plots
+make_acc_loss = True # Accuracy and loss plot of the training history, might not work with tf 1.x
 make_roc = True # ROC curve plot
 make_conf = True # print confusion matrix
 make_impo = True # calculate importance of features
