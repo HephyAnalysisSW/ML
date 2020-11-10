@@ -117,28 +117,30 @@ upfile = {}
 df = {}
 
 # read data into dataframe
+key_list = list(filename.keys())
 
-for key in filename:
-    upfile[key] = uproot.open(filename[key])
+for key in key_list: # root file to pandas dataframe
+    upfile[key] = uproot.open(filename[key]) 
     df[key] = upfile[key][treename].pandas.df(branches=variables)
 
 # preprocessing
-NDIM = len(variables)
-N_classes = len(filename)
+NDIM = len(variables) # number of variables
+N_classes = len(filename) # number of classes
 
 class_digit = range(N_classes)
 
-for key, digit in zip(filename, class_digit):
+for key, digit in zip(key_list, class_digit): # add isSignal variable, class_digit
     df[key]['isSignal'] = np.ones(len(df[key])) * digit
 
+
 # concatenate the dataframes
-key_list = list(filename.keys())
 df_all = pd.concat([df[key_list[0]], df[key_list[1]]])
 
 if len(filename) > 1:
     for i in range(2, len(filename)):
         df_all = pd.concat([df_all, df[key_list[i]]])
 
+# check for NaN in the dataframe, .root file might be slightly broken
 for key in key_list:
     for var in variables:
         if df[key][var].isnull().values.any() == True:
@@ -148,12 +150,13 @@ for key in key_list:
 
 df_all = df_all.dropna() # removes all Events with nan
 
+# split dataset into Input and output data
 dataset = df_all.values
 X = dataset[:,0:NDIM]
 Y = dataset[:,NDIM]
 
-# make plots
 
+# make histogram plots of the input variables
 if make_plots:
     import matplotlib.pyplot as plt
     for i, j in enumerate(variables):
@@ -188,10 +191,11 @@ from sklearn.preprocessing import label_binarize
 classes = range(len(filename))
 Y = label_binarize(Y, classes=classes)
 
+# split data into train and test, test_size = 0.2 is quite standard for this
 from sklearn.model_selection import train_test_split
 X_train_val, X_test, Y_train_val, Y_test = train_test_split(X, Y, test_size=0.2, random_state=7, shuffle = True)
 
-# define model
+# define model (neural network)
 from keras.models import Sequential, Model
 from keras.optimizers import SGD
 from keras.layers import Input, Activation, Dense, Convolution2D, MaxPooling2D, Dropout, Flatten
@@ -209,24 +213,27 @@ model.add(Dense(len(filename), kernel_initializer='normal', activation='sigmoid'
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 model.summary()
 
-# train the model
+# define callback for early stopping
 import tensorflow as tf
 callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=4)
 
+# train the model
 history = model.fit(X_train_val, 
                     Y_train_val, 
                     epochs=1000, 
                     batch_size=batch_size,
                     #verbose=0, # switch to 1 for more verbosity, 'silences' the output
                     callbacks=[callback],
-                    validation_split=0.1
-                    #validation_data=(X_test,Y_test)
+                    #validation_split=0.1
+                    validation_data=(X_test,Y_test) # use either validation_split or validation_data
                    )
 print('trainig finished')
 
 # saving
 model.save(model_path + config + '_keras_model.h5')
 
+
+# make accuracy vs epoch and loss vs epoch plots
 if make_acc_loss:
     print('Star accuracy and loss plot')
     import matplotlib.pyplot as plt
@@ -251,6 +258,8 @@ if make_acc_loss:
     #
     plt.savefig(save_path + 'acc_score.png')
 
+
+# make a plot of the roc curves for each variable
 if make_roc:
     print('Start roc-plot')
     import matplotlib.pyplot as plt
@@ -315,6 +324,7 @@ if make_roc:
     plt.savefig(save_path + 'ROC_curve.png')
 
 
+# print the confusion matrix
 if make_conf:
     Y_predict = model.predict(X_test)
     print('Start confusion matrix')
@@ -333,6 +343,7 @@ if make_conf:
     print(np.array(cmat))
 
 
+# calculate the permutation variable importance
 if make_impo:
     print('Start importance')
     #
@@ -397,6 +408,7 @@ if make_impo:
     plt.savefig("/local/mmoser/plots/importance_score.png")
 
 
+# make output plots
 if make_outp:
     print('Start output plot')
     import matplotlib.pyplot as plt
